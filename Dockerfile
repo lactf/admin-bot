@@ -8,14 +8,10 @@ COPY .puppeteerrc.cjs package.json package-lock.json ./
 RUN npm ci && npm cache clean --force
 RUN npx puppeteer browsers install chrome --install-deps
 
-COPY . .
+COPY index.js submit.html /app
+RUN mkdir /app/handlers
 
 ENV PORT=8080
-
-ARG RECAPTCHA_SITE
-ENV RECAPTCHA_SITE=${RECAPTCHA_SITE}
-ARG RECAPTCHA_SECRET
-ENV RECAPTCHA_SECRET=${RECAPTCHA_SECRET}
 
 USER node
 CMD ["node", "index.js"]
