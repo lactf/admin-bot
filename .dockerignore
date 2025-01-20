@@ -1,0 +1,3 @@
+**/node_modules/
+/.cache/
+/handlers/example.js.disabled
