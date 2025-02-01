@@ -1,6 +1,5 @@
 module.exports = {
     name: "mychall",
-    timeout: 5000,
     async execute(browser, url) {
         const page = await browser.newPage();
         await page.setCookie({
@@ -12,6 +11,7 @@ module.exports = {
         await page.goto(url);
         await page.waitForNetworkIdle({
             timeout: 5000,
+            idleTime: 2000
         });
         await page.close();
     },

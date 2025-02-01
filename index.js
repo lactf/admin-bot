@@ -74,17 +74,13 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
                     );
                 }
             }
-            let ctx;
+            let ctx = null;
             let ret = undefined;
             try {
-                ctx = await (await browser).createBrowserContext();
-                const prom = handler.timeout
-                    ? Promise.race([
-                          handler.execute(ctx, url),
-                          sleep(handler.timeout),
-                      ])
-                    : handler.execute(ctx, url);
-                ret = await prom;
+                if (!handler.noContext) {
+                    ctx = await (await browser).createBrowserContext();
+                }
+                ret = await handler.execute(ctx, url);
             } catch (err) {
                 console.error("Handler error", err);
                 if (ctx) {
@@ -115,7 +111,7 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
 }
 
 app.get("/", (req, res) => {
-    res.send("admin bot is up");
+    res.send("Admin bot is running.");
 });
 
 app.listen(port, () => {
