@@ -16,14 +16,11 @@ function replace(str, old, rep) {
     return str.replaceAll(old, rep.replaceAll("$", "$$$$"));
 }
 
-function sleep(ms) {
-    return new Promise((res) => setTimeout(res, ms));
-}
-
 const browser = puppeteer.launch({ pipe: true, args: ["--js-flags=--jitless", "--incognito"] });
 
 app.use(express.urlencoded({ extended: false }));
 
+const handlers = new Map();
 for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
     if (f.endsWith(".js")) {
         const handler = require("./" + path.join("handlers", f));
@@ -106,12 +103,17 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
                 `/${handler.name}?m=${encodeURIComponent("Visit successful")}`
             );
         });
+        handlers.set(handler.name, handler);
         console.log(`Registered handler for ${handler.name}.`);
     }
 }
 
 app.get("/", (req, res) => {
-    res.send("Admin bot is running.");
+    if (handlers.size() === 1) {
+        res.redirect("/" + handler.name);
+    } else {
+        res.send("Admin bot is running.");
+    }
 });
 
 app.listen(port, () => {
