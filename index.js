@@ -1,4 +1,4 @@
-require("dotenv").config({path: ["chall.env", ".env"]});
+require("dotenv").config({ path: ["chall.env", ".env"] });
 
 const express = require("express");
 const axios = require("axios");
@@ -25,25 +25,15 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
     if (f.endsWith(".js")) {
         const handler = require("./" + path.join("handlers", f));
         let page = replace(submitPage, "$NAME", handler.name);
-        page = replace(
-            page,
-            "$RECAPTCHA_SITE",
-            process.env.RECAPTCHA_SITE || ""
-        );
-        page = replace(
-            page,
-            "$RECAPTCHA_SECRET",
-            process.env.RECAPTCHA_SECRET || ""
-        );
+        page = replace(page, "$RECAPTCHA_SITE", process.env.RECAPTCHA_SITE || "");
+        page = replace(page, "$RECAPTCHA_SECRET", process.env.RECAPTCHA_SECRET || "");
         app.get("/" + handler.name, (req, res) => {
             res.type("text/html").send(page);
         });
         app.post("/" + handler.name, async (req, res) => {
             const url = req.body.url;
             if (!(handler.urlRegex || /^https?:\/\//).test(url)) {
-                return res.redirect(
-                    `/${handler.name}?e=${encodeURIComponent("Invalid URL")}`
-                );
+                return res.redirect(`/${handler.name}?e=${encodeURIComponent("Invalid URL")}`);
             }
             if (process.env.RECAPTCHA_SITE && process.env.RECAPTCHA_SECRET) {
                 try {
@@ -51,24 +41,13 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
                         secret: process.env.RECAPTCHA_SECRET,
                         response: req.body["g-recaptcha-response"],
                     });
-                    const resp = await axios.post(
-                        "https://www.google.com/recaptcha/api/siteverify",
-                        body
-                    );
+                    const resp = await axios.post("https://www.google.com/recaptcha/api/siteverify", body);
                     if (!resp.data.success) {
-                        return res.redirect(
-                            `/${handler.name}?e=${encodeURIComponent(
-                                "Invalid captcha"
-                            )}`
-                        );
+                        return res.redirect(`/${handler.name}?e=${encodeURIComponent("Invalid captcha")}`);
                     }
                 } catch (err) {
                     console.error("Captcha verification failure", err);
-                    return res.redirect(
-                        `/${handler.name}?e=${encodeURIComponent(
-                            "Error verifying captcha"
-                        )}`
-                    );
+                    return res.redirect(`/${handler.name}?e=${encodeURIComponent("Error verifying captcha")}`);
                 }
             }
             let ctx = null;
@@ -85,23 +64,15 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
                         await ctx.close();
                     } catch (e) {}
                 }
-                return res.redirect(
-                    `/${handler.name}?e=${encodeURIComponent(
-                        "Error visiting page"
-                    )}`
-                );
+                return res.redirect(`/${handler.name}?e=${encodeURIComponent("Error visiting page")}`);
             }
             try {
                 await ctx.close();
             } catch (e) {}
             if (typeof ret === "object" && ret !== null && "error" in ret) {
-                return res.redirect(
-                    `/${handler.name}?e=${encodeURIComponent(ret.error)}`
-                );
+                return res.redirect(`/${handler.name}?e=${encodeURIComponent(ret.error)}`);
             }
-            return res.redirect(
-                `/${handler.name}?m=${encodeURIComponent("Visit successful")}`
-            );
+            return res.redirect(`/${handler.name}?m=${encodeURIComponent("Visit successful")}`);
         });
         handlers.set(handler.name, handler);
         console.log(`Registered handler for ${handler.name}.`);
