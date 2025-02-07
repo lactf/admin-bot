@@ -81,7 +81,7 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
 
 app.get("/", (req, res) => {
     if (handlers.size === 1) {
-        res.redirect("/" + handler.name);
+        res.redirect("/" + [...handlers.keys()][0]);
     } else {
         res.send("Admin bot is running.");
     }
