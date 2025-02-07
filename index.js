@@ -66,9 +66,11 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
                 }
                 return res.redirect(`/${handler.name}?e=${encodeURIComponent("Error visiting page")}`);
             }
-            try {
-                await ctx.close();
-            } catch (e) {}
+            if (ctx) {
+                try {
+                    await ctx.close();
+                } catch (e) {}
+            }
             if (typeof ret === "object" && ret !== null && "error" in ret) {
                 return res.redirect(`/${handler.name}?e=${encodeURIComponent(ret.error)}`);
             }
