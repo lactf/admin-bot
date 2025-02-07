@@ -16,7 +16,14 @@ function replace(str, old, rep) {
     return str.replaceAll(old, rep.replaceAll("$", "$$$$"));
 }
 
-const browser = puppeteer.launch({ pipe: true, args: ["--js-flags=--jitless", "--incognito"] });
+const opts = {
+    pipe: true,
+    args: ["--js-flags=--jitless", "--incognito"],
+};
+if (process.env.PUPPETEER_OPTIONS) {
+    Object.assign(opts, JSON.parse(process.env.PUPPETEER_OPTIONS));
+}
+const browser = puppeteer.launch(opts);
 
 app.use(express.urlencoded({ extended: false }));
 
@@ -53,10 +60,12 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
             let ctx = null;
             let ret = undefined;
             try {
-                if (!handler.noContext) {
+                if (handler.noContext) {
+                    ret = await handler.execute(await browser, url);
+                } else {
                     ctx = await (await browser).createBrowserContext();
+                    ret = await handler.execute(ctx, url);
                 }
-                ret = await handler.execute(ctx, url);
             } catch (err) {
                 console.error("Handler error", err);
                 if (ctx) {
