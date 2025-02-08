@@ -23,6 +23,16 @@ const opts = {
 if (process.env.PUPPETEER_OPTIONS) {
     Object.assign(opts, JSON.parse(process.env.PUPPETEER_OPTIONS));
 }
+
+try {
+    const status = fs.readFileSync("/proc/1/status", "utf8");
+    const capBnd = parseInt(status.match(/^CapBnd:\s+([0-9a-f]+)$/m)[1], 16);
+    if ((capBnd & (1 << 21)) === 0) {
+        console.error("WARNING: Missing CAP_SYS_ADMIN. Adding --no-sandbox to Chrome launch options.");
+        opts.args.push("--no-sandbox");
+    }
+} catch (err) {}
+
 const browser = puppeteer.launch(opts);
 
 app.use(express.urlencoded({ extended: false }));
