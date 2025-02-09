@@ -67,6 +67,7 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
                     return res.redirect(`/${handler.name}?e=${encodeURIComponent("Error verifying captcha")}`);
                 }
             }
+            console.log(`Handler ${handler.name}: Visiting URL ${url}`);
             let ctx = null;
             let ret = undefined;
             try {
@@ -78,17 +79,13 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
                 }
             } catch (err) {
                 console.error("Handler error", err);
+                return res.redirect(`/${handler.name}?e=${encodeURIComponent("Error visiting page")}`);
+            } finally {
                 if (ctx) {
                     try {
                         await ctx.close();
                     } catch (e) {}
                 }
-                return res.redirect(`/${handler.name}?e=${encodeURIComponent("Error visiting page")}`);
-            }
-            if (ctx) {
-                try {
-                    await ctx.close();
-                } catch (e) {}
             }
             if (typeof ret === "object" && ret !== null && "error" in ret) {
                 return res.redirect(`/${handler.name}?e=${encodeURIComponent(ret.error)}`);
