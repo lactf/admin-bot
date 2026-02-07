@@ -33,7 +33,7 @@ try {
     }
 } catch (err) {}
 
-const browser = puppeteer.launch(opts);
+let browser = puppeteer.launch(opts);
 
 app.use(express.urlencoded({ extended: false }));
 
@@ -74,7 +74,16 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
                 if (handler.noContext) {
                     ret = await handler.execute(await browser, url);
                 } else {
-                    ctx = await (await browser).createBrowserContext();
+                    try {
+                        ctx = await (await browser).createBrowserContext();
+                    } catch (err) {
+                        if (err instanceof puppeteer.ConnectionClosedError) {
+                            browser = puppeteer.launch(opts);
+                            ctx = await (await browser).createBrowserContext();
+                        } else {
+                            throw err;
+                        }
+                    }
                     ret = await handler.execute(ctx, url);
                 }
             } catch (err) {
