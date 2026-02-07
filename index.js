@@ -48,6 +48,9 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
             res.type("text/html").send(page);
         });
         app.post("/" + handler.name, async (req, res) => {
+            if (!req.body || typeof req.body !== "object") {
+                return res.redirect(`/${handler.name}?e=${encodeURIComponent("Invalid request")}`);
+            }
             const url = req.body.url;
             if (typeof url !== "string" || !(handler.urlRegex || /^https?:\/\//).test(url)) {
                 return res.redirect(`/${handler.name}?e=${encodeURIComponent("Invalid URL")}`);
