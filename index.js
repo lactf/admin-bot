@@ -49,7 +49,7 @@ for (const f of fs.readdirSync(path.join(__dirname, "handlers"))) {
         });
         app.post("/" + handler.name, async (req, res) => {
             const url = req.body.url;
-            if (!(handler.urlRegex || /^https?:\/\//).test(url)) {
+            if (typeof url !== "string" || !(handler.urlRegex || /^https?:\/\//).test(url)) {
                 return res.redirect(`/${handler.name}?e=${encodeURIComponent("Invalid URL")}`);
             }
             if (process.env.RECAPTCHA_SITE && process.env.RECAPTCHA_SECRET) {
