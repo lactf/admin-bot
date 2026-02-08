@@ -18,7 +18,7 @@ function replace(str, old, rep) {
 
 const opts = {
     pipe: true,
-    args: ["--js-flags=--jitless", "--incognito"],
+    args: ["--js-flags=--jitless"],
 };
 if (process.env.PUPPETEER_OPTIONS) {
     Object.assign(opts, JSON.parse(process.env.PUPPETEER_OPTIONS));
