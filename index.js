@@ -18,7 +18,7 @@ function replace(str, old, rep) {
 
 const opts = {
     pipe: true,
-    args: ["--js-flags=--jitless", "--incognito"],
+    args: ["--js-flags=--jitless", "--incognito", "--disable-dev-shm-usage", "--disable-gpu"],
     dumpio: true
 };
 if (process.env.PUPPETEER_OPTIONS) {
